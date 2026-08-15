@@ -43,6 +43,9 @@ const BILLING_CYCLES: ReadonlyArray<BillingCycle> = [
   'monthly',
   'quarterly',
   'yearly',
+  '28_days',
+  '56_days',
+  '84_days',
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

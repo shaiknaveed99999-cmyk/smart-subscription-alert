@@ -50,7 +50,8 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-sharing"
+      "expo-sharing",
+      "./plugins/withNotificationService.js"
     ],
     "experiments": {
       "typedRoutes": true

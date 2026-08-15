@@ -186,3 +186,37 @@ export async function openPaymentApp(
   console.warn(`No payment link is available for ${serviceName}.`);
   return false;
 }
+
+const MANDATE_CANDIDATES = [
+  'phonepe://mandate',
+  'teal://mandate',
+  'paytmmp://mandate',
+  'upi://mandate',
+] as const;
+
+export async function openMandateManagement(): Promise<boolean> {
+  for (const url of MANDATE_CANDIDATES) {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+
+      if (canOpen) {
+        await Linking.openURL(url);
+        return true;
+      }
+    } catch (error: unknown) {
+      console.warn(`Could not open mandate link: ${url}`, error);
+    }
+  }
+
+  try {
+    await Linking.openURL('upi://mandate');
+    return true;
+  } catch (error: unknown) {
+    console.warn('Could not open UPI AutoPay management.', error);
+    Alert.alert(
+      'No UPI app found',
+      'Open PhonePe, Google Pay, or Paytm to manage AutoPay mandates.',
+    );
+    return false;
+  }
+}

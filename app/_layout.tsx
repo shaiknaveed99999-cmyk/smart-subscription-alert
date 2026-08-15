@@ -1,9 +1,15 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { AppRegistry } from 'react-native';
 
 import { Colors } from '../constants/theme';
 import { requestNotificationPermissions } from '../utils/notifications';
+
+AppRegistry.registerHeadlessTask(
+  'BankSmsBackground',
+  () => require('../utils/backgroundTask').default,
+);
 
 export default function RootLayout() {
   useEffect(() => {
@@ -48,6 +54,16 @@ export default function RootLayout() {
           options={{
             headerShown: true,
             title: 'Support',
+            headerShadowVisible: false,
+            headerStyle: { backgroundColor: Colors.background },
+            headerTintColor: Colors.textPrimary,
+          }}
+        />
+        <Stack.Screen
+          name="passbook-test"
+          options={{
+            headerShown: true,
+            title: 'Passbook debug',
             headerShadowVisible: false,
             headerStyle: { backgroundColor: Colors.background },
             headerTintColor: Colors.textPrimary,

@@ -1,0 +1,11 @@
+---
+description: Keep agent replies and edits token-efficient
+alwaysApply: true
+---
+
+# Token efficiency
+
+- Always provide concise, direct answers without unnecessary conversational filler.
+- When editing code, only output the specific functions or components being changed, not the entire file.
+- Do not explain basic React Native or Expo concepts unless explicitly asked.
+- Prioritize finding the most token-efficient solution to any problem.

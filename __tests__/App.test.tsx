@@ -35,7 +35,8 @@ import {
 } from '../utils/backup';
 import { generateCategoryChartData } from '../utils/chartData';
 import { generateUpiUrl } from '../utils/deeplink';
-import { formatBillingDate } from '../utils/format';
+import { formatBillingDate, formatCurrency } from '../utils/format';
+import { parseBankSms } from '../utils/smsParser';
 import { computeSubscriptionStatus } from '../utils/status';
 import {
   getMonthlyBurnRate,
@@ -268,6 +269,25 @@ describe('Smart Subscription Alert core logic', () => {
     expect(getByText(formatBillingDate('2026-09-15'))).toBeTruthy();
   });
 
+  test('tapping a quick-add template fills name, cost, category, and cycle without changing the date', async () => {
+    const { getByDisplayValue, getByRole, getByText } = await render(
+      <AddSubscriptionScreen />,
+    );
+
+    await chooseBillingDate(getByRole, '2026-09-15');
+    await fireEvent.press(getByRole('button', { name: 'Quick add Jio' }));
+
+    expect(getByDisplayValue('Jio')).toBeTruthy();
+    expect(getByDisplayValue('299')).toBeTruthy();
+    expect(
+      getByRole('button', { name: 'Telecom', selected: true }),
+    ).toBeTruthy();
+    expect(
+      getByRole('button', { name: '28 days', selected: true }),
+    ).toBeTruthy();
+    expect(getByText(formatBillingDate('2026-09-15'))).toBeTruthy();
+  });
+
   test('updates an existing subscription and retrieves the edited values', async () => {
     const originalSubscription = await Storage.addSubscription({
       name: 'Netflix',
@@ -469,6 +489,9 @@ describe('Smart Subscription Alert core logic', () => {
     { billingCycle: 'monthly', cost: 120, expected: 120 },
     { billingCycle: 'quarterly', cost: 120, expected: 40 },
     { billingCycle: 'yearly', cost: 120, expected: 10 },
+    { billingCycle: '28_days', cost: 120, expected: (120 / 28) * 30 },
+    { billingCycle: '56_days', cost: 120, expected: (120 / 56) * 30 },
+    { billingCycle: '84_days', cost: 120, expected: (120 / 84) * 30 },
   ])(
     'prorates a $billingCycle bill to its monthly cost',
     ({ billingCycle, cost, expected }) => {
@@ -561,6 +584,21 @@ describe('Smart Subscription Alert core logic', () => {
       dueDate: '2028-02-29',
       expectedDueDate: '2029-02-28',
     },
+    {
+      billingCycle: '28_days',
+      dueDate: '2026-01-29',
+      expectedDueDate: '2026-02-26',
+    },
+    {
+      billingCycle: '56_days',
+      dueDate: '2026-01-29',
+      expectedDueDate: '2026-03-26',
+    },
+    {
+      billingCycle: '84_days',
+      dueDate: '2026-01-29',
+      expectedDueDate: '2026-04-23',
+    },
   ])(
     'marks a $billingCycle subscription as paid and advances its due date',
     async ({ billingCycle, dueDate, expectedDueDate }) => {
@@ -634,6 +672,54 @@ describe('Smart Subscription Alert core logic', () => {
     );
   });
 
+  test.each<{
+    billingCycle: BillingCycle;
+    dueDate: string;
+    expectedDueDate: string;
+  }>([
+    {
+      billingCycle: '28_days',
+      dueDate: '2026-07-10',
+      expectedDueDate: '2026-08-07',
+    },
+    {
+      billingCycle: '56_days',
+      dueDate: '2026-06-12',
+      expectedDueDate: '2026-08-07',
+    },
+    {
+      billingCycle: '84_days',
+      dueDate: '2026-05-15',
+      expectedDueDate: '2026-08-07',
+    },
+  ])(
+    'auto-rolls an overdue $billingCycle telecom plan by exact calendar days',
+    async ({ billingCycle, dueDate, expectedDueDate }) => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(2026, 7, 7, 12, 0, 0, 0));
+
+      const overdueSubscription: Subscription = {
+        ...MOCK_SUBSCRIPTIONS[0],
+        id: `overdue-${billingCycle}`,
+        billingCycle,
+        nextBillingDate: dueDate,
+      };
+
+      await Storage.saveSubscriptions([overdueSubscription]);
+      const updatedSubscriptions = await rollForwardOverdueSubscriptions();
+
+      expect(updatedSubscriptions).toEqual([
+        expect.objectContaining({
+          id: `overdue-${billingCycle}`,
+          nextBillingDate: expectedDueDate,
+        }),
+      ]);
+      await expect(Storage.loadSubscriptions()).resolves.toEqual(
+        updatedSubscriptions,
+      );
+    },
+  );
+
   test('builds a valid UPI pay URI from the required fields', () => {
     expect(
       generateUpiUrl({
@@ -646,6 +732,34 @@ describe('Smart Subscription Alert core logic', () => {
     ).toBe(
       'upi://pay?pa=merchant%40upi&pn=Smart%20Alert&am=49&cu=INR&tn=Coffee%20tip',
     );
+  });
+
+  test('parses an AutoPay bank SMS into amount, merchant, and mandate flag', () => {
+    expect(
+      parseBankSms(
+        'Rs.649.00 debited from a/c **1234 on 15-Aug-26 to Netflix. Mandate executed.',
+      ),
+    ).toEqual({
+      amount: 649,
+      merchant: 'Netflix',
+      isAutoPay: true,
+      date: '15-Aug-26',
+    });
+  });
+
+  test('parses a one-time debit SMS without AutoPay', () => {
+    expect(
+      parseBankSms('INR 1,299 paid to Hotstar on 01-09-2026.'),
+    ).toEqual({
+      amount: 1299,
+      merchant: 'Hotstar',
+      isAutoPay: false,
+      date: '01-09-2026',
+    });
+  });
+
+  test('returns null when a bank SMS has no parseable amount', () => {
+    expect(parseBankSms('debited to Netflix. Mandate executed.')).toBeNull();
   });
 
   test('shows a privacy-first support screen and opens a UPI tip intent', async () => {
@@ -913,6 +1027,32 @@ describe('Smart Subscription Alert core logic', () => {
     await fireEvent.press(settingsButton);
 
     expect(router.push).toHaveBeenCalledWith('/support');
+  });
+
+  test('toggles the dashboard between monthly burn and yearly projection', async () => {
+    const { findByText, getAllByText, getByRole, getByText, queryByText } =
+      await render(<HomeScreen />);
+
+    expect(await findByText('Monthly Burn Rate')).toBeTruthy();
+
+    await fireEvent.press(
+      getByRole('button', { name: 'Show yearly projection' }),
+    );
+
+    expect(getByText('Yearly Projection')).toBeTruthy();
+    expect(queryByText('Monthly Burn Rate')).toBeNull();
+    expect(
+      getAllByText(
+        formatCurrency(getMonthlyBurnRate(MOCK_SUBSCRIPTIONS) * 12),
+      ).length,
+    ).toBeGreaterThan(0);
+
+    await fireEvent.press(
+      getByRole('button', { name: 'Show monthly projection' }),
+    );
+
+    expect(getByText('Monthly Burn Rate')).toBeTruthy();
+    expect(queryByText('Yearly Projection')).toBeNull();
   });
 
   test('generates prorated category totals for the donut chart', () => {

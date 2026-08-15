@@ -2,7 +2,14 @@ export type SubscriptionCategory = 'telecom' | 'streaming' | 'utility' | 'financ
 
 export type SubscriptionStatus = 'active' | 'due_soon' | 'overdue';
 
-export type BillingCycle = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type BillingCycle =
+  | 'weekly'
+  | 'monthly'
+  | 'quarterly'
+  | 'yearly'
+  | '28_days'
+  | '56_days'
+  | '84_days';
 
 export interface Subscription {
   id: string;

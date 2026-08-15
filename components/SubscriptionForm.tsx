@@ -16,6 +16,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Colors, Radius, Spacing } from '../constants/theme';
+import {
+  SUBSCRIPTION_TEMPLATES,
+  type SubscriptionTemplate,
+} from '../data/templates';
 import type {
   BillingCycle,
   SubscriptionCategory,
@@ -29,6 +33,9 @@ const BILLING_CYCLE_OPTIONS: ReadonlyArray<{
 }> = [
   { label: 'Weekly', value: 'weekly' },
   { label: 'Monthly', value: 'monthly' },
+  { label: '28 days', value: '28_days' },
+  { label: '56 days', value: '56_days' },
+  { label: '84 days', value: '84_days' },
   { label: 'Quarterly', value: 'quarterly' },
   { label: 'Yearly', value: 'yearly' },
 ];
@@ -186,6 +193,13 @@ export function SubscriptionForm({
     ? new Date(`${billingDueDate}T00:00:00`)
     : new Date();
 
+  const applyTemplate = (template: SubscriptionTemplate) => {
+    setServiceName(template.name);
+    setMonthlyCost(template.cost);
+    setCategory(template.category);
+    setBillingCycle(template.cycle);
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <KeyboardAvoidingView
@@ -202,6 +216,57 @@ export function SubscriptionForm({
           </View>
 
           <View style={styles.form}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Quick add</Text>
+              <ScrollView
+                contentContainerStyle={styles.templateRow}
+                horizontal
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+                showsHorizontalScrollIndicator={false}
+              >
+                {SUBSCRIPTION_TEMPLATES.map((template) => {
+                  const isSelected = serviceName === template.name;
+
+                  return (
+                    <Pressable
+                      accessibilityLabel={`Quick add ${template.name}`}
+                      accessibilityRole="button"
+                      accessibilityState={{
+                        disabled: saving,
+                        selected: isSelected,
+                      }}
+                      disabled={saving}
+                      key={template.name}
+                      onPress={() => applyTemplate(template)}
+                      style={({ pressed }) => [
+                        styles.templateChip,
+                        isSelected && styles.cycleOptionSelected,
+                        pressed && styles.cycleOptionPressed,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.templateName,
+                          isSelected && styles.cycleOptionTextSelected,
+                        ]}
+                      >
+                        {template.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.templateCost,
+                          isSelected && styles.cycleOptionTextSelected,
+                        ]}
+                      >
+                        ₹{template.cost}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
             <View style={styles.field}>
               <Text style={styles.label}>Service name</Text>
               <TextInput
@@ -469,6 +534,33 @@ const styles = StyleSheet.create({
   form: {
     gap: Spacing.lg,
   },
+  templateRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingRight: Spacing.sm,
+  },
+  templateChip: {
+    minWidth: 108,
+    minHeight: 58,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  templateName: {
+    color: Colors.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  templateCost: {
+    color: Colors.textMuted,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+  },
   field: {
     gap: Spacing.sm,
   },
@@ -545,10 +637,10 @@ const styles = StyleSheet.create({
   },
   cycleRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 6,
   },
   cycleOption: {
-    flex: 1,
     minHeight: 42,
     alignItems: 'center',
     justifyContent: 'center',
@@ -556,7 +648,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     borderRadius: Radius.sm,
     backgroundColor: Colors.surface,
-    paddingHorizontal: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.sm,
   },
   cycleOptionSelected: {
     borderColor: Colors.accent,

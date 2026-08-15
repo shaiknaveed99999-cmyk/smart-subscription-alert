@@ -5,6 +5,7 @@ import type {
 } from '../types/subscription';
 import { Colors, Radius, Spacing } from '../constants/theme';
 import { formatBillingDate, formatCurrency } from '../utils/format';
+import { openMandateManagement } from '../utils/deeplink';
 import { getProratedMonthlyCost } from '../utils/subscriptions';
 
 type SubscriptionRowProps = {
@@ -54,6 +55,12 @@ function billingCycleSuffix(billingCycle: BillingCycle): string {
       return 'qtr';
     case 'yearly':
       return 'yr';
+    case '28_days':
+      return '28d';
+    case '56_days':
+      return '56d';
+    case '84_days':
+      return '84d';
     default: {
       const exhaustiveCycle: never = billingCycle;
       throw new Error(`Unhandled billing cycle: ${exhaustiveCycle}`);
@@ -173,6 +180,17 @@ export function SubscriptionRow({
         >
           <Text style={styles.markPaidButtonText}>Mark as Paid</Text>
         </Pressable>
+        <Pressable
+          accessibilityLabel={`Manage AutoPay for ${subscription.name}`}
+          accessibilityRole="button"
+          onPress={() => void openMandateManagement()}
+          style={({ pressed }) => [
+            styles.mandateButton,
+            pressed && styles.actionButtonPressed,
+          ]}
+        >
+          <Text style={styles.mandateButtonText}>Manage AutoPay</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -286,12 +304,14 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.sm,
     marginTop: 14,
     marginLeft: 58,
   },
   payButton: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '40%',
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
@@ -304,7 +324,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   editButton: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '40%',
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
@@ -319,7 +340,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   markPaidButton: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '40%',
     minHeight: 36,
     alignItems: 'center',
     justifyContent: 'center',
@@ -330,6 +352,22 @@ const styles = StyleSheet.create({
   },
   markPaidButtonText: {
     color: Colors.accent,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  mandateButton: {
+    flexGrow: 1,
+    flexBasis: '40%',
+    minHeight: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.warning,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.warningSoft,
+  },
+  mandateButtonText: {
+    color: Colors.warning,
     fontSize: 12,
     fontWeight: '700',
   },

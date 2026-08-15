@@ -24,7 +24,7 @@ import { scheduleSubscriptionAlert } from '../utils/notifications';
 import { CategoryChart } from '../components/CategoryChart';
 import { SubscriptionList } from '../components/SubscriptionList';
 import { TotalSpendCard } from '../components/TotalSpendCard';
-import { Colors, Spacing } from '../constants/theme';
+import { Colors, Radius, Spacing } from '../constants/theme';
 import type { Subscription } from '../types/subscription';
 
 export default function HomeScreen() {
@@ -32,6 +32,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isYearly, setIsYearly] = useState(false);
 
   const refreshSubscriptions = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -146,6 +147,7 @@ export default function HomeScreen() {
   }, []);
 
   const totalSpend = getMonthlyBurnRate(subscriptions);
+  const yearlyTotal = totalSpend * 12;
   const categoryChartData = useMemo(
     () =>
       generateCategoryChartData(
@@ -191,11 +193,54 @@ export default function HomeScreen() {
 
             {!loading ? (
               <>
+                <View style={styles.projectionToggle} accessibilityRole="tablist">
+                  <Pressable
+                    accessibilityLabel="Show monthly projection"
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: !isYearly }}
+                    onPress={() => setIsYearly(false)}
+                    style={({ pressed }) => [
+                      styles.projectionOption,
+                      !isYearly && styles.projectionOptionSelected,
+                      pressed && styles.projectionOptionPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.projectionOptionText,
+                        !isYearly && styles.projectionOptionTextSelected,
+                      ]}
+                    >
+                      Monthly
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityLabel="Show yearly projection"
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isYearly }}
+                    onPress={() => setIsYearly(true)}
+                    style={({ pressed }) => [
+                      styles.projectionOption,
+                      isYearly && styles.projectionOptionSelected,
+                      pressed && styles.projectionOptionPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.projectionOptionText,
+                        isYearly && styles.projectionOptionTextSelected,
+                      ]}
+                    >
+                      Yearly
+                    </Text>
+                  </Pressable>
+                </View>
                 <TotalSpendCard
-                  total={totalSpend}
+                  total={isYearly ? yearlyTotal : totalSpend}
                   activeCount={subscriptions.length}
+                  isYearly={isYearly}
                 />
-                <CategoryChart data={categoryChartData} />
+                <CategoryChart data={categoryChartData} isYearly={isYearly} />
               </>
             ) : null}
 
@@ -267,6 +312,38 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontWeight: '500',
     maxWidth: 320,
+  },
+  projectionToggle: {
+    flexDirection: 'row',
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.md,
+    padding: 4,
+    borderRadius: Radius.xl,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  projectionOption: {
+    minWidth: 92,
+    minHeight: 36,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  projectionOptionSelected: {
+    backgroundColor: Colors.accent,
+  },
+  projectionOptionPressed: {
+    opacity: 0.8,
+  },
+  projectionOptionText: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  projectionOptionTextSelected: {
+    color: '#FFFFFF',
   },
   error: {
     marginTop: Spacing.md,

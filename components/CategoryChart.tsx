@@ -8,23 +8,28 @@ import { formatCurrency } from '../utils/format';
 
 type CategoryChartProps = {
   data: CategoryChartDatum[];
+  isYearly?: boolean;
 };
 
-export function CategoryChart({ data }: CategoryChartProps) {
+export function CategoryChart({ data, isYearly = false }: CategoryChartProps) {
+  const displayMultiplier = isYearly ? 12 : 1;
   const totalMonthlyBurnRate = data.reduce(
     (total, category) => total + category.value,
     0,
   );
+  const displayedTotal = totalMonthlyBurnRate * displayMultiplier;
   const renderCenterLabel = useCallback(
     () => (
       <View style={styles.centerLabel}>
         <Text style={styles.centerAmount}>
-          {formatCurrency(totalMonthlyBurnRate)}
+          {formatCurrency(displayedTotal)}
         </Text>
-        <Text style={styles.centerCaption}>monthly burn rate</Text>
+        <Text style={styles.centerCaption}>
+          {isYearly ? 'yearly projection' : 'monthly burn rate'}
+        </Text>
       </View>
     ),
-    [totalMonthlyBurnRate],
+    [displayedTotal, isYearly],
   );
 
   if (data.length === 0 || totalMonthlyBurnRate <= 0) {
@@ -43,7 +48,9 @@ export function CategoryChart({ data }: CategoryChartProps) {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Spending by category</Text>
-          <Text style={styles.subtitle}>Prorated monthly share</Text>
+          <Text style={styles.subtitle}>
+            {isYearly ? 'Projected yearly share' : 'Prorated monthly share'}
+          </Text>
         </View>
       </View>
 
@@ -77,7 +84,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
             <Text style={styles.legendLabel}>{category.category}</Text>
             <Text style={styles.legendPercentage}>{category.text}</Text>
             <Text style={styles.legendValue}>
-              {formatCurrency(category.value)}
+              {formatCurrency(category.value * displayMultiplier)}
             </Text>
           </View>
         ))}

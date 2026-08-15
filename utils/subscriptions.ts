@@ -38,6 +38,15 @@ export function getProratedMonthlyCost(
     case 'yearly':
       proratedCost = cost / 12;
       break;
+    case '28_days':
+      proratedCost = (cost / 28) * 30;
+      break;
+    case '56_days':
+      proratedCost = (cost / 56) * 30;
+      break;
+    case '84_days':
+      proratedCost = (cost / 84) * 30;
+      break;
     default: {
       const exhaustiveCycle: never = billingCycle;
       throw new Error(`Unhandled billing cycle: ${exhaustiveCycle}`);
@@ -62,6 +71,12 @@ export function getMonthlyBurnRate(
   );
 }
 
+function addDaysToIsoDate(isoDate: string, days: number): string {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 function addMonthsToIsoDate(isoDate: string, months: number): string {
   const [year, month, day] = isoDate.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1, 1));
@@ -81,11 +96,14 @@ function getNextDueDate(
   billingCycle: BillingCycle,
 ): string {
   switch (billingCycle) {
-    case 'weekly': {
-      const date = new Date(`${currentDueDate}T00:00:00Z`);
-      date.setUTCDate(date.getUTCDate() + 7);
-      return date.toISOString().slice(0, 10);
-    }
+    case 'weekly':
+      return addDaysToIsoDate(currentDueDate, 7);
+    case '28_days':
+      return addDaysToIsoDate(currentDueDate, 28);
+    case '56_days':
+      return addDaysToIsoDate(currentDueDate, 56);
+    case '84_days':
+      return addDaysToIsoDate(currentDueDate, 84);
     case 'monthly':
       return addMonthsToIsoDate(currentDueDate, 1);
     case 'quarterly':

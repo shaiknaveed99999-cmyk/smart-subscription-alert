@@ -6,23 +6,31 @@ type TotalSpendCardProps = {
   total: number;
   currency?: string;
   activeCount: number;
+  isYearly?: boolean;
 };
 
 export function TotalSpendCard({
   total,
   currency = 'INR',
   activeCount,
+  isYearly = false,
 }: TotalSpendCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.glow} />
-      <Text style={styles.label}>Monthly Burn Rate</Text>
-      <Text style={styles.amount}>{formatCurrency(total, currency)}</Text>
+      <Text style={styles.label}>
+        {isYearly ? 'Yearly Projection' : 'Monthly Burn Rate'}
+      </Text>
+      <Text style={[styles.amount, isYearly && styles.yearlyAmount]}>
+        {formatCurrency(total, currency)}
+      </Text>
       <View style={styles.metaRow}>
         <Text style={styles.metaText}>
           {activeCount} active {activeCount === 1 ? 'item' : 'items'}
         </Text>
-        <Text style={styles.period}>Prorated monthly</Text>
+        <Text style={styles.period}>
+          {isYearly ? 'Projected yearly' : 'Prorated monthly'}
+        </Text>
       </View>
     </View>
   );
@@ -59,6 +67,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: -1.2,
     marginBottom: Spacing.md,
+  },
+  yearlyAmount: {
+    color: '#FECACA',
+    fontWeight: '800',
   },
   metaRow: {
     flexDirection: 'row',

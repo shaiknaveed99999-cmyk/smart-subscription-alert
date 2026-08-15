@@ -1,0 +1,15 @@
+# Controls what the AI is allowed to read and index.
+# Keep dependencies, native build output, and heavy binaries out of context.
+
+node_modules/
+.expo/
+dist/
+/android/
+/ios/
+coverage/
+.gradle-dist/
+*.apk
+*.aab
+npm-debug.log*
+assets/*.png
+assets/*.jpg
