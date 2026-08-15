@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy — Smart Subscription Alert</title>
+    <style>
+      :root {
+        --sage: #1f6b4a;
+        --sage-deep: #164f37;
+        --canvas: #f3f5f2;
+        --surface: #ffffff;
+        --text: #1a211c;
+        --muted: #5c6b61;
+        --border: #d9e0d8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--text);
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        line-height: 1.65;
+      }
+
+      header {
+        background: var(--sage);
+        color: #fff;
+        padding: 48px 24px 40px;
+      }
+
+      header .wrap,
+      main,
+      footer {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        letter-spacing: -0.03em;
+      }
+
+      .updated {
+        margin: 0;
+        color: #d7ebe1;
+        font-size: 0.95rem;
+      }
+
+      main {
+        padding: 32px 24px 64px;
+      }
+
+      section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 16px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        color: var(--sage-deep);
+        font-size: 1.2rem;
+      }
+
+      p,
+      li {
+        color: var(--muted);
+      }
+
+      ul {
+        padding-left: 1.2rem;
+      }
+
+      footer {
+        padding: 0 24px 48px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <h1>Privacy Policy</h1>
+        <p class="updated">Smart Subscription Alert · Last updated 15 August 2026</p>
+      </div>
+    </header>
+    <main>
+      <section>
+        <h2>Overview</h2>
+        <p>
+          Smart Subscription Alert is a local subscription and bill reminder
+          app for Android. This policy explains what the app does — and does
+          not do — with information on your device.
+        </p>
+      </section>
+      <section>
+        <h2>100% offline</h2>
+        <p>
+          The app is 100% offline. It does not create an account, does not
+          require sign-in, and does not transmit data to any external servers.
+          There is no cloud sync, analytics backend, or remote API.
+        </p>
+      </section>
+      <section>
+        <h2>Local storage only</h2>
+        <p>
+          Subscription names, amounts, due dates, categories, and optional
+          payment links are stored on this device with AsyncStorage. Optional
+          JSON backups that you export stay under your control (share sheet or
+          a file you choose). Uninstalling the app removes locally stored data.
+        </p>
+      </section>
+      <section>
+        <h2>No personal data collection</h2>
+        <p>
+          The app does not collect personal data. It does not read SMS, does
+          not access contacts, location, or your call log, and does not scan
+          other apps. Local notifications are scheduled on-device so reminders
+          can fire after a reboot.
+        </p>
+      </section>
+      <section>
+        <h2>No third-party sharing</h2>
+        <p>
+          The app does not share data with third parties. Optional UPI tip
+          actions only open a payment app you already have installed, using a
+          developer-configured payee ID. That handoff is initiated by you and
+          is not a data-collection pipeline.
+        </p>
+      </section>
+      <section>
+        <h2>Permissions</h2>
+        <ul>
+          <li>Post notifications — upcoming bill reminders</li>
+          <li>Schedule exact alarms — timed local alerts</li>
+          <li>Receive boot completed — restore reminders after restart</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Contact</h2>
+        <p>
+          Questions about this policy can be sent through the app listing on
+          the Google Play Store.
+        </p>
+      </section>
+    </main>
+    <footer>
+      Smart Subscription Alert does not collect personal data, does not
+      transmit data to any external servers, does not read SMS, and does not
+      share data with third parties.
+    </footer>
+  </body>
+</html>
