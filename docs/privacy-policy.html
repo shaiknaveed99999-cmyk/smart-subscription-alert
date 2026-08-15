@@ -122,10 +122,29 @@
       <section>
         <h2>No personal data collection</h2>
         <p>
-          The app does not collect personal data. It does not read SMS, does
-          not access contacts, location, or your call log, and does not scan
-          other apps. Local notifications are scheduled on-device so reminders
-          can fire after a reboot.
+          The app does not collect personal data. It does not read the SMS
+          inbox, does not access contacts, location, or your call log, and
+          does not upload data from other apps. Local notifications are
+          scheduled on-device so reminders can fire after a reboot.
+        </p>
+      </section>
+      <section>
+        <h2>Notification Access (Smart Passbook)</h2>
+        <p>
+          The app requests Notification Access solely to identify bank and
+          subscription transaction alerts. That access is used only for the
+          optional Smart Passbook feature, which you enable in Android
+          Notification access settings.
+        </p>
+        <p>
+          The parsing happens 100% locally on the device. Matching alerts are
+          converted into subscription records stored in AsyncStorage on this
+          phone.
+        </p>
+        <p>
+          No notification data, SMS content, or financial information is ever
+          transmitted to a server, shared with third parties, or stored
+          externally.
         </p>
       </section>
       <section>
@@ -143,6 +162,10 @@
           <li>Post notifications — upcoming bill reminders</li>
           <li>Schedule exact alarms — timed local alerts</li>
           <li>Receive boot completed — restore reminders after restart</li>
+          <li>
+            Notification access (optional) — Smart Passbook local parsing of
+            bank and subscription alerts
+          </li>
         </ul>
       </section>
       <section>
